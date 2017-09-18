@@ -1,0 +1,11 @@
+name: MoneySAdminShop
+main: net.comorevi.moneysadminshop.MoneySAdminShop
+author: popkechupki
+api: ["1.0.0"]
+version: 1.0.0
+load: POSTWORLD
+description: CoSSeのadminshopプラグイン
+
+commands:
+  adminshop:
+    description: アドミンショップのヘルプを確認できます。
