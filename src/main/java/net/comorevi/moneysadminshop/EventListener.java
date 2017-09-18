@@ -34,7 +34,7 @@ public class EventListener implements Listener {
     				player.sendMessage(TextValues.INFO + plugin.translateString("shop-removed"));
     			} else {
     				event.setCancelled();
-    				player.sendMessage(TextValues.ALERT + plugin.translateString("﻿player-isNotOP"));
+    				player.sendMessage(TextValues.ALERT + plugin.translateString("﻿error-shop-remove"));
     			}
     		}
     	}
