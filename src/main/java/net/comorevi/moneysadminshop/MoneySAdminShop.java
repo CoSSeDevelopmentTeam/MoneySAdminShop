@@ -44,7 +44,7 @@ import net.comorevi.moneyapi.MoneySAPI;
 
 public class MoneySAdminShop extends PluginBase {
 	
-	public static MoneySAPI money;
+	private MoneySAPI money;
 	
 	private Config translateFile;
     private Map<String, Object> configData = new HashMap<String, Object>();
@@ -59,7 +59,7 @@ public class MoneySAdminShop extends PluginBase {
 		this.initHelpFile();
 		this.initMessageConfig();
 		this.initMoneySAdminShopConfig();
-		
+
 		this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
 		
 		try{
@@ -93,6 +93,10 @@ public class MoneySAdminShop extends PluginBase {
 	/////////////
 	// Utility //
 	/////////////
+	public MoneySAPI getMoneySAPI() {
+		return MoneySAPI.getInstance();
+	}
+	
 	public void helpMessage(final CommandSender sender){
         Thread th = new Thread(new Runnable(){
             @Override
