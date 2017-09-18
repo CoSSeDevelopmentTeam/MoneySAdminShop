@@ -29,12 +29,12 @@ public class EventListener implements Listener {
     	if(isSign(block)) {
     		String[] line = getSignText(block);
     		Player player = event.getPlayer();
-    		if(line[0].equals("[" + MoneySAdminShop.shopTitle + "]")) {
+    		if(line[0].equals("[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]")) {
     			if(player.isOp()) {
     				player.sendMessage(TextValues.INFO + plugin.translateString("shop-removed"));
     			} else {
     				event.setCancelled();
-    				player.sendMessage(TextValues.ALERT + plugin.translateString("player-isNotOP"));
+    				player.sendMessage(TextValues.ALERT + plugin.translateString("﻿player-isNotOP"));
     			}
     		}
     	}
@@ -47,20 +47,23 @@ public class EventListener implements Listener {
     	if(line[0].equals("ashop")) {
     		try {
     			if(player.isOp()) {
+    				event.setLine(0, "[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]");
 	    			String[] line1 = line[1].split(":");
 		    		//if(isNumber(line1[0]) || isNumber(line1[1]) || isNumber(line[2]) || isNumber(line[3])) {
 		    			String itemname = null;
 	    				if(line1.length == 1) {
 		    				Item item = Item.get(Integer.parseInt(line[1]));
 		    				itemname = item.getName();
+		    				event.setLine(1, itemname);
+		    				event.setLine(3, "取引量: " + line[3] + ",  " + "値段: " + line[2]);
+		    				event.setLine(2, line1[0] + ":" + 0);
 		    			} else {
 		    				Item item = Item.get(Integer.parseInt(line1[0]), Integer.parseInt(line1[1]));
 		    				itemname = item.getName();
+		    				event.setLine(1, itemname);
+		    				event.setLine(3, "取引量: " + line[3] + ",  " + "値段: " + line[2]);
+		    				event.setLine(2, line1[0] + ":" + line1[1]);
 		    			}		
-		    			event.setLine(0, "[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]");
-		    			event.setLine(1, itemname);
-		    			event.setLine(3, "取引量: " + line[3] + ",  " + "値段: " + line[2]);
-		    			event.setLine(2, line1[0] + ":" + line1[1]);
 		    			player.sendMessage(TextValues.INFO + plugin.translateString("shop-create"));
 		    		} else {
 		    			player.sendMessage(TextValues.WARNING + plugin.translateString("error-all"));
@@ -88,25 +91,29 @@ public class EventListener implements Listener {
     	if(isSign(block)) {
     		String[] line = getSignText(block);
     		if(line[0].equals("[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]")) {
-    			String[] line3 = line[3].split(", ");
-    			String[] line3price = line3[1].split(": ");
-    			int price = Integer.parseInt(line3price[1]);
-    			int money = plugin.getMoneySAPI().getMoney(player);
-    			if(price < money) {
-    				String[] line2 = line[2].split(":");
-    				int id = Integer.parseInt(line2[0]);
-    				int meta = Integer.parseInt(line2[1]);
-    				String[] line3count = line3[0].split(": ");
-    				int count = Integer.parseInt(line3count[1]);
-    				if(player.getInventory().canAddItem(Item.get(id, meta, count))) {
-    					player.getInventory().addItem(Item.get(id, meta, count));
-    					plugin.getMoneySAPI().reduceMoney(username, price);
-    					player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", line[1], String.valueOf(count), String.valueOf(price), plugin.getMoneySAPI().getMoneyUnit()));
-    				} else {
-    					player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
-    				}
-    			} else {
-    				player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
+    			try {
+    				String[] line3 = line[3].split(", ");
+	    			String[] line3price = line3[1].split(": ");
+	    			int price = Integer.parseInt(line3price[1]);
+	    			int money = plugin.getMoneySAPI().getMoney(player);
+	    			if(price < money) {
+	    				String[] line2 = line[2].split(":");
+	    				int id = Integer.parseInt(line2[0]);
+	    				int meta = Integer.parseInt(line2[1]);
+	    				String[] line3count = line3[0].split(": ");
+	    				int count = Integer.parseInt(line3count[1]);
+	    				if(player.getInventory().canAddItem(Item.get(id, meta, count))) {
+	    					player.getInventory().addItem(Item.get(id, meta, count));
+	    					plugin.getMoneySAPI().reduceMoney(username, price);
+	    					player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", line[1], String.valueOf(count), String.valueOf(price), plugin.getMoneySAPI().getMoneyUnit()));
+	    				} else {
+	    					player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
+	    				}
+	    			} else {
+	    				player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
+	    			}
+    			} catch(ArrayIndexOutOfBoundsException e) {
+    				
     			}
     		}
     	}
