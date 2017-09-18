@@ -63,7 +63,7 @@ public class MoneySAdminShop extends PluginBase {
 		this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
 		
 		try{
-            this.getServer().getPluginManager().getPlugin("MoneySAPI");
+            this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");
         }catch(Exception e){
             this.getLogger().alert(TextValues.ALERT + this.translateString("error-no-moneysapi"));
             this.getServer().getPluginManager().disablePlugin(this);
@@ -94,7 +94,7 @@ public class MoneySAdminShop extends PluginBase {
 	// Utility //
 	/////////////
 	public MoneySAPI getMoneySAPI() {
-		return MoneySAPI.getInstance();
+		return this.money;
 	}
 	
 	public void helpMessage(final CommandSender sender){
