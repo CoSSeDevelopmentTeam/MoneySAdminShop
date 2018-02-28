@@ -27,60 +27,62 @@ public class EventListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
     	Block block = event.getBlock();
     	if(isSign(block)) {
-    		String[] line = getSignText(block);
-    		Player player = event.getPlayer();
-    		if(line[0].equals("[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]")) {
-    			if(player.isOp()) {
-    				player.sendMessage(TextValues.INFO + plugin.translateString("shop-removed"));
-    			} else {
-    				event.setCancelled();
-    				player.sendMessage(TextValues.ALERT + plugin.translateString("﻿error-shop-remove"));
-    			}
-    		}
+    		try {
+				String[] line = getSignText(block);
+				Player player = event.getPlayer();
+				if(line[0].equals("[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]")) {
+					if(player.isOp()) {
+						player.sendMessage(TextValues.INFO + plugin.translateString("shop-removed"));
+					} else {
+						event.setCancelled();
+						player.sendMessage(TextValues.ALERT + plugin.translateString("﻿error-shop-remove"));
+					}
+				}
+			} catch(ArrayIndexOutOfBoundsException e) {
+   
+			}
     	}
     }
     
     @EventHandler
     public void onSignChange(SignChangeEvent event) {
     	Player player = event.getPlayer();
-    	String[] line = event.getLines();
-    	if(line[0].equals("ashop")) {
-    		try {
-    			if(player.isOp()) {
-    				event.setLine(0, "[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]");
-	    			String[] line1 = line[1].split(":");
-		    		//if(isNumber(line1[0]) || isNumber(line1[1]) || isNumber(line[2]) || isNumber(line[3])) {
-		    			String itemname = null;
-	    				if(line1.length == 1) {
-		    				Item item = Item.get(Integer.parseInt(line[1]));
-		    				itemname = item.getName();
-		    				event.setLine(1, itemname);
-		    				event.setLine(3, "取引量: " + line[3] + ",  " + "値段: " + line[2]);
-		    				event.setLine(2, line1[0] + ":" + 0);
-		    			} else {
-		    				Item item = Item.get(Integer.parseInt(line1[0]), Integer.parseInt(line1[1]));
-		    				itemname = item.getName();
-		    				event.setLine(1, itemname);
-		    				event.setLine(3, "取引量: " + line[3] + ",  " + "値段: " + line[2]);
-		    				event.setLine(2, line1[0] + ":" + line1[1]);
-		    			}		
-		    			player.sendMessage(TextValues.INFO + plugin.translateString("shop-create"));
-		    		} else {
-		    			player.sendMessage(TextValues.WARNING + plugin.translateString("error-all"));
-		    		}
-	    		//} else {
-	    			//player.sendMessage(TextValues.INFO + plugin.translateString("player-isNotOP"));
-    		} catch(NumberFormatException e) {
-    			
-    		} catch(ArrayIndexOutOfBoundsException e) {
-    			
-    		} catch(IllegalArgumentException e) {
-    			
-    		}
-    	} else if(line[0].equals("[" + MoneySAdminShop.shopTitle + "]")) {
-    		event.setCancelled();
-    		player.sendMessage(TextValues.ALERT + plugin.translateString("error-all"));
-    	}
+    	try {
+			if(event.getLine(0).equals("ashop") && !event.getLine(1).equals("") && !event.getLine(2).equals("") && !event.getLine(3).equals("")) {
+				String[] line = event.getLines();
+				if(player.isOp()) {
+					event.setLine(0, "[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]");
+					String[] line1 = line[1].split(":");
+					//if(isNumber(line1[0]) || isNumber(line1[1]) || isNumber(line[2]) || isNumber(line[3])) {
+					String itemname = null;
+					if(line1.length == 1) {
+						Item item = Item.get(Integer.parseInt(line[1]));
+						itemname = item.getName();
+						event.setLine(1, itemname);
+						event.setLine(3, "取引量: " + line[3] + ",  " + "値段: " + line[2]);
+						event.setLine(2, line1[0] + ":" + 0);
+					} else {
+						Item item = Item.get(Integer.parseInt(line1[0]), Integer.parseInt(line1[1]));
+						itemname = item.getName();
+						event.setLine(1, itemname);
+						event.setLine(3, "取引量: " + line[3] + ",  " + "値段: " + line[2]);
+						event.setLine(2, line1[0] + ":" + line1[1]);
+					}
+					player.sendMessage(TextValues.INFO + plugin.translateString("shop-create"));
+				} else {
+					player.sendMessage(TextValues.WARNING + plugin.translateString("error-all"));
+				}
+			}/*else if(event.getLine(0).equals("[" + MoneySAdminShop.shopTitle + "]")) {
+    			event.setCancelled();
+    			player.sendMessage(TextValues.ALERT + plugin.translateString("error-all"));
+    		}*/
+		} catch(NumberFormatException e) {
+    		return;
+		} catch(ArrayIndexOutOfBoundsException e) {
+    		//なんにもしません
+		} catch(IllegalArgumentException e) {
+    		//なんにもしません
+		}
     }
     
     @EventHandler

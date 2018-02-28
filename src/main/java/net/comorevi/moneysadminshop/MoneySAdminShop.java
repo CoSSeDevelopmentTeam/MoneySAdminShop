@@ -15,6 +15,8 @@
  *
  * - 1.0.0
  *    基本的な機能を追加。ほぼ動作するように。
+ *  - 1.0.1
+ *    看板の破壊やショップの作成時にエラーが出ていた問題を修正
  *
  */
 
@@ -27,16 +29,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
-import cn.nukkit.level.Level;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.Utils;
