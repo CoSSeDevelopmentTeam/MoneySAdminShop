@@ -1,81 +1,99 @@
 package net.comorevi.moneysadminshop;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.LinkedHashMap;
 
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockSignPost;
-import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.block.SignChangeEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.item.Item;
-import cn.nukkit.utils.TextFormat;
 
 public class EventListener implements Listener {
 
     private MoneySAdminShop plugin;
+    private SQLite3DataProvider sqLite3DataProvider;
 
-    public EventListener(MoneySAdminShop plugin) {
+    public EventListener(MoneySAdminShop plugin, SQLite3DataProvider sql) {
         this.plugin = plugin;
+        this.sqLite3DataProvider = sql;
     }
     
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-    	Block block = event.getBlock();
-    	if(isSign(block)) {
-    		try {
-				String[] line = getSignText(block);
-				Player player = event.getPlayer();
-				if(line[0].equals("[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]")) {
-					if(player.isOp()) {
+		Player player = event.getPlayer();
+		Block block = event.getBlock();
+		switch(block.getId()) {
+			case Block.SIGN_POST:
+			case Block.WALL_SIGN:
+				int[] signCondition = {(int) block.x, (int) block.y, (int) block.z};
+				if(sqLite3DataProvider.existsShop(signCondition)) {
+					if(sqLite3DataProvider.isShopOwnerOrOperator(signCondition, player)) {
+						sqLite3DataProvider.removeShopBySign(signCondition);
 						player.sendMessage(TextValues.INFO + plugin.translateString("shop-removed"));
 					} else {
-						event.setCancelled();
 						player.sendMessage(TextValues.ALERT + plugin.translateString("﻿error-shop-remove"));
+						event.setCancelled();
 					}
 				}
-			} catch(ArrayIndexOutOfBoundsException e) {
-   
-			}
-    	}
+				break;
+		}
     }
     
     @EventHandler
     public void onSignChange(SignChangeEvent event) {
-    	Player player = event.getPlayer();
     	try {
 			if(event.getLine(0).equals("ashop") && !event.getLine(1).equals("") && !event.getLine(2).equals("") && !event.getLine(3).equals("")) {
-				String[] line = event.getLines();
+				Player player = event.getPlayer();
 				if(player.isOp()) {
-					event.setLine(0, "[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]");
-					String[] line1 = line[1].split(":");
-					//if(isNumber(line1[0]) || isNumber(line1[1]) || isNumber(line[2]) || isNumber(line[3])) {
-					String itemname = null;
-					if(line1.length == 1) {
-						Item item = Item.get(Integer.parseInt(line[1]));
-						itemname = item.getName();
-						event.setLine(1, itemname);
-						event.setLine(3, "取引量: " + line[3] + ",  " + "値段: " + line[2]);
-						event.setLine(2, line1[0] + ":" + 0);
+					String shopOwner = player.getName();
+					String[] productData = event.getLine(3).split(":");
+					int saleNum = 0;
+					int price = 0;
+					int priceIncludeCommission = 0;
+					int pID = 0;
+					int pMeta = 0;
+					try {
+						saleNum = Integer.parseInt(event.getLine(1));
+						price = Integer.parseInt(event.getLine(2));
+						priceIncludeCommission = (int) (price * 0.5);
+						pID = Integer.parseInt(productData[0]);
+						pMeta = Integer.parseInt(productData[1]);
+					} catch (NullPointerException e) {
+						pMeta = 0;
+					} catch (ArrayIndexOutOfBoundsException e) {
+						pMeta = 0;
+					} catch (NumberFormatException e) {
+						event.setCancelled();
+						player.sendMessage("システム>> 不適切なデータが入力されました");
+					}
+					
+					Block sign = event.getBlock();
+					
+					if (!event.getLine(0).equals("ashop")) return;
+					if (saleNum <= 0) return;
+					if (price < 0) return;
+					if (pID == 0) return;
+					
+					String productName = Block.get(pID, pMeta).getName();
+					event.setLine(0, "[" + MoneySAdminShop.shopTitle + "]");
+					event.setLine(1, "数量/amount:" + saleNum);
+					event.setLine(2, "値段/price:" + priceIncludeCommission);
+					event.setLine(3, productName);
+					
+					int[] signCondition = {(int) event.getBlock().x, (int) event.getBlock().y, (int) event.getBlock().z};
+					if(sqLite3DataProvider.existsShop(signCondition)) {
+						sqLite3DataProvider.updateShop(shopOwner, saleNum, priceIncludeCommission, pID, pMeta, sign);
 					} else {
-						Item item = Item.get(Integer.parseInt(line1[0]), Integer.parseInt(line1[1]));
-						itemname = item.getName();
-						event.setLine(1, itemname);
-						event.setLine(3, "取引量: " + line[3] + ",  " + "値段: " + line[2]);
-						event.setLine(2, line1[0] + ":" + line1[1]);
+						sqLite3DataProvider.registerShop(shopOwner, saleNum, priceIncludeCommission, pID, pMeta, sign);
 					}
 					player.sendMessage(TextValues.INFO + plugin.translateString("shop-create"));
 				} else {
 					player.sendMessage(TextValues.WARNING + plugin.translateString("error-all"));
 				}
-			}/*else if(event.getLine(0).equals("[" + MoneySAdminShop.shopTitle + "]")) {
-    			event.setCancelled();
-    			player.sendMessage(TextValues.ALERT + plugin.translateString("error-all"));
-    		}*/
+			}
 		} catch(NumberFormatException e) {
     		return;
 		} catch(ArrayIndexOutOfBoundsException e) {
@@ -87,63 +105,33 @@ public class EventListener implements Listener {
     
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
-    	Player player = event.getPlayer();
-    	String username = player.getName();
-    	Block block= event.getBlock();
-    	if(isSign(block)) {
-    		String[] line = getSignText(block);
-    		if(line[0].equals("[" + TextFormat.AQUA + MoneySAdminShop.shopTitle + TextFormat.BLACK + "]")) {
-    			try {
-    				String[] line3 = line[3].split(", ");
-	    			String[] line3price = line3[1].split(": ");
-	    			int price = Integer.parseInt(line3price[1]);
-	    			int money = plugin.getMoneySAPI().getMoney(player);
-	    			if(price < money) {
-	    				String[] line2 = line[2].split(":");
-	    				int id = Integer.parseInt(line2[0]);
-	    				int meta = Integer.parseInt(line2[1]);
-	    				String[] line3count = line3[0].split(": ");
-	    				int count = Integer.parseInt(line3count[1]);
-	    				if(player.getInventory().canAddItem(Item.get(id, meta, count))) {
-	    					player.getInventory().addItem(Item.get(id, meta, count));
-	    					plugin.getMoneySAPI().reduceMoney(username, price);
-	    					player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", line[1], String.valueOf(count), String.valueOf(price), plugin.getMoneySAPI().getMoneyUnit()));
-	    				} else {
-	    					player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
-	    				}
-	    			} else {
-	    				player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
-	    			}
-    			} catch(ArrayIndexOutOfBoundsException e) {
-    				
-    			}
-    		}
-    	}
-    }
-    
-    public String[] getSignText(Block block) {
-    	if(block instanceof BlockSignPost) {
-    		BlockEntitySign sign = (BlockEntitySign) block.getLevel().getBlockEntity(block);
-    		return sign.getText();
-    	}    	
-		return null;
-    }
-    
-    public boolean isSign(Block block) {
-    	switch(block.getId()) {
-    		case Block.WALL_SIGN:
-    		case Block.SIGN_POST:
-    			return true;
-    		default:
-    			return false;
-    	}
-    }
-    
-    public boolean isNumber(String num) {
-        String regex = "/^[0-9]+:[0-9]+$/";
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(num);
-        return m.find();
+		Player player = event.getPlayer();
+		String username = player.getName();
+		Block block = event.getBlock();
+		int[] signCondition = {(int) block.x, (int) block.y, (int) block.z};
+		if(sqLite3DataProvider.existsShop(signCondition)) {
+			LinkedHashMap<String, Object> shopSignInfo = sqLite3DataProvider.getShopInfo(signCondition);
+			
+			int buyermoney = plugin.getMoneySAPI().getMoney(player);
+			if((int) shopSignInfo.get("price") < buyermoney) {
+				player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
+				return;
+			}
+			
+			int pID = (int) shopSignInfo.get("productID");
+			int pMeta = (int) shopSignInfo.get("productMeta");
+		
+			Item shopItem = Item.get(pID, pMeta, (int) shopSignInfo.get("saleNum"));
+			if(player.getInventory().canAddItem(shopItem)) {
+				player.getInventory().addItem(shopItem);
+			} else {
+				player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
+			}
+
+			plugin.getMoneySAPI().reduceMoney(username, (int) shopSignInfo.get("price"));
+			
+			player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", shopItem.getName().toString(), shopSignInfo.get("saleNum").toString(), shopSignInfo.get("price").toString(), plugin.getMoneySAPI().getMoneyUnit()));
+		}
     }
 
 }

@@ -17,6 +17,8 @@
  *    基本的な機能を追加。ほぼ動作するように。
  *  - 1.0.1
  *    看板の破壊やショップの作成時にエラーが出ていた問題を修正
+ * - 1.2.0
+ *    手数料概念の追加とショップデータをsqlite3での保管管理に変更
  *
  */
 
@@ -57,8 +59,10 @@ public class MoneySAdminShop extends PluginBase {
 		this.initHelpFile();
 		this.initMessageConfig();
 		this.initMoneySAdminShopConfig();
+		
+		SQLite3DataProvider sql = new SQLite3DataProvider(this);
 
-		this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
+		this.getServer().getPluginManager().registerEvents(new EventListener(this, sql), this);
 		
 		try{
             this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");
