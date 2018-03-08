@@ -58,7 +58,7 @@ public class EventListener implements Listener {
 					try {
 						saleNum = Integer.parseInt(event.getLine(1));
 						price = Integer.parseInt(event.getLine(2));
-						priceIncludeCommission = (int) (price * 0.5);
+						priceIncludeCommission = (int) (price * 0.05);
 						pID = Integer.parseInt(productData[0]);
 						pMeta = Integer.parseInt(productData[1]);
 					} catch (NullPointerException e) {
