@@ -17,14 +17,14 @@ public class SQLite3DataProvider {
 		connect();
 	}
 	
-	public void removeShopBySign(int[] condition) {
+	public void removeShopBySign(Object[] condition) {
 		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection("jdbc:sqlite:" + this.path + "/DataDB.db");
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			statement.executeUpdate("delete from AdminShop where signX = " + condition[0] + " and signY = " + condition[1] + " and signZ = " + condition[2]);
+			statement.executeUpdate("delete from AdminShop where signX = " + condition[0] + " and signY = " + condition[1] + " and signZ = " + condition[2] + " and level = '" + condition[3] + "'");
 		} catch(SQLException e) {
 			System.err.println(e.getMessage() + " : at removeShopSign");
 		} finally {
@@ -46,7 +46,7 @@ public class SQLite3DataProvider {
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			statement.executeUpdate("insert into AdminShop (shopOwner, saleNum, price, productID, productMeta, signX, signY, signZ) values ('"+shopOwner+"', "+saleNum+", "+price+", "+productID+", "+productMeta+", "+sign.x+", "+sign.y+", "+sign.z+")");
+			statement.executeUpdate("insert into AdminShop (shopOwner, saleNum, price, productID, productMeta, signX, signY, signZ, level) values ('"+shopOwner+"', "+saleNum+", "+price+", "+productID+", "+productMeta+", "+sign.x+", "+sign.y+", "+sign.z+", '"+sign.getLevel().getName()+"')");
 		} catch(SQLException e) {
 			System.err.println(e.getMessage() + " : at registerShop");
 		} finally {
@@ -68,7 +68,7 @@ public class SQLite3DataProvider {
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			statement.executeUpdate("replace into AdminShop (shopOwner, saleNum, price, productID, productMeta, signX, signY, signZ) values ('"+shopOwner+"', "+saleNum+", "+price+", "+productID+", "+productMeta+", "+sign.x+", "+sign.y+", "+sign.z+")");
+			statement.executeUpdate("replace into AdminShop (shopOwner, saleNum, price, productID, productMeta, signX, signY, signZ, level) values ('"+shopOwner+"', "+saleNum+", "+price+", "+productID+", "+productMeta+", "+sign.x+", "+sign.y+", "+sign.z+", '"+sign.getLevel().getName()+"')");
 		} catch(SQLException e) {
 			System.err.println(e.getMessage() + " : at updateShop");
 		} finally {
@@ -83,14 +83,14 @@ public class SQLite3DataProvider {
 		}
 	}
 	
-	public LinkedHashMap<String, Object> getShopInfo(int[] condition) {
+	public LinkedHashMap<String, Object> getShopInfo(Object[] condition) {
 		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection("jdbc:sqlite:" + this.path + "/DataDB.db");
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			ResultSet rs = statement.executeQuery("select * from AdminShop where signX = " + condition[0] + " and signY = " + condition[1] + " and signZ = " + condition[2]);
+			ResultSet rs = statement.executeQuery("select * from AdminShop where signX = " + condition[0] + " and signY = " + condition[1] + " and signZ = " + condition[2] + " and level = '" + condition[3] + "'");
 			LinkedHashMap<String, Object> shopInfo = new LinkedHashMap<String, Object>(){{
 				put("shopOwner", rs.getString("shopOwner"));
 				put("saleNum", rs.getInt("saleNum"));
@@ -118,7 +118,7 @@ public class SQLite3DataProvider {
 		return null;
 	}
 	
-	public boolean isShopOwnerOrOperator(int[] condition, Player player) {
+	public boolean isShopOwnerOrOperator(Object[] condition, Player player) {
 		Connection connection = null;
 		try {
 			if(player.isOp()) return true;
@@ -127,7 +127,7 @@ public class SQLite3DataProvider {
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			ResultSet rs = statement.executeQuery("select * from AdminShop where signX = " + condition[0] + " and signY = " + condition[1] + " and signZ = " + condition[2]);
+			ResultSet rs = statement.executeQuery("select * from AdminShop where signX = " + condition[0] + " and signY = " + condition[1] + " and signZ = " + condition[2] + " and level = '" + condition[3] + "'");
 			if(rs.getString("shopOwner").equals(player.getName())) return true;
 		} catch(SQLException e) {
 			System.err.println(e.getMessage() + " : at isShopOwner");
@@ -144,14 +144,14 @@ public class SQLite3DataProvider {
 		return false;
 	}
 	
-	public boolean existsShop(int[] condition) {
+	public boolean existsShop(Object[] condition) {
 		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection("jdbc:sqlite:" + this.path + "/DataDB.db");
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			ResultSet rs = statement.executeQuery("select * from AdminShop where signX = " + condition[0] + " and signY = " + condition[1] + " and signZ = " + condition[2]);
+			ResultSet rs = statement.executeQuery("select * from AdminShop where signX = " + condition[0] + " and signY = " + condition[1] + " and signZ = " + condition[2] + " and level = '" + condition[3] + "'");
 			return rs.next();
 		} catch(SQLException e) {
 			System.err.println(e.getMessage() + " : at existsShop");
@@ -190,7 +190,8 @@ public class SQLite3DataProvider {
 					"productMeta integer not null, " +
 					"signX integer not null, " +
 					"signY integer not null, " +
-					"signZ integer not null" +
+					"signZ integer not null, " +
+					"level text not null" +
 					")"
 			);
 		} catch(SQLException e) {

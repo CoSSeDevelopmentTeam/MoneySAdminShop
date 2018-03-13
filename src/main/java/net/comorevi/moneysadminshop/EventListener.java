@@ -28,7 +28,7 @@ public class EventListener implements Listener {
 		switch(block.getId()) {
 			case Block.SIGN_POST:
 			case Block.WALL_SIGN:
-				int[] signCondition = {(int) block.x, (int) block.y, (int) block.z};
+				Object[] signCondition = {(int) block.x, (int) block.y, (int) block.z , block.getLevel().getName()};
 				if(sqLite3DataProvider.existsShop(signCondition)) {
 					if(sqLite3DataProvider.isShopOwnerOrOperator(signCondition, player)) {
 						sqLite3DataProvider.removeShopBySign(signCondition);
@@ -83,7 +83,7 @@ public class EventListener implements Listener {
 					event.setLine(2, "値段/price:" + priceIncludeCommission);
 					event.setLine(3, productName);
 					
-					int[] signCondition = {(int) event.getBlock().x, (int) event.getBlock().y, (int) event.getBlock().z};
+					Object[] signCondition = {(int) event.getBlock().x, (int) event.getBlock().y, (int) event.getBlock().z, event.getBlock().getLevel().getName()};
 					if(sqLite3DataProvider.existsShop(signCondition)) {
 						sqLite3DataProvider.updateShop(shopOwner, saleNum, priceIncludeCommission, pID, pMeta, sign);
 					} else {
@@ -108,29 +108,34 @@ public class EventListener implements Listener {
 		Player player = event.getPlayer();
 		String username = player.getName();
 		Block block = event.getBlock();
-		int[] signCondition = {(int) block.x, (int) block.y, (int) block.z};
-		if(sqLite3DataProvider.existsShop(signCondition)) {
-			LinkedHashMap<String, Object> shopSignInfo = sqLite3DataProvider.getShopInfo(signCondition);
-			
-			int buyermoney = plugin.getMoneySAPI().getMoney(player);
-			if((int) shopSignInfo.get("price") < buyermoney) {
-				player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
-				return;
-			}
-			
-			int pID = (int) shopSignInfo.get("productID");
-			int pMeta = (int) shopSignInfo.get("productMeta");
-		
-			Item shopItem = Item.get(pID, pMeta, (int) shopSignInfo.get("saleNum"));
-			if(player.getInventory().canAddItem(shopItem)) {
-				player.getInventory().addItem(shopItem);
-			} else {
-				player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
-			}
-
-			plugin.getMoneySAPI().reduceMoney(username, (int) shopSignInfo.get("price"));
-			
-			player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", shopItem.getName().toString(), shopSignInfo.get("saleNum").toString(), shopSignInfo.get("price").toString(), plugin.getMoneySAPI().getMoneyUnit()));
+		switch(block.getId()) {
+			case Block.SIGN_POST:
+			case Block.WALL_SIGN:
+				Object[] signCondition = {(int) block.x, (int) block.y, (int) block.z, block.getLevel().getName()};
+				if(sqLite3DataProvider.existsShop(signCondition)) {
+					LinkedHashMap<String, Object> shopSignInfo = sqLite3DataProvider.getShopInfo(signCondition);
+					
+					int buyermoney = plugin.getMoneySAPI().getMoney(player);
+					if((int) shopSignInfo.get("price") < buyermoney) {
+						player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
+						return;
+					}
+					
+					int pID = (int) shopSignInfo.get("productID");
+					int pMeta = (int) shopSignInfo.get("productMeta");
+					
+					Item shopItem = Item.get(pID, pMeta, (int) shopSignInfo.get("saleNum"));
+					if(player.getInventory().canAddItem(shopItem)) {
+						player.getInventory().addItem(shopItem);
+					} else {
+						player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
+					}
+					
+					plugin.getMoneySAPI().reduceMoney(username, (int) shopSignInfo.get("price"));
+					
+					player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", shopItem.getName().toString(), shopSignInfo.get("saleNum").toString(), shopSignInfo.get("price").toString(), plugin.getMoneySAPI().getMoneyUnit()));
+				}
+				break;
 		}
     }
 
