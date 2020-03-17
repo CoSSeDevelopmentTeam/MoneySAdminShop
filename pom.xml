@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.comorevi</groupId>
     <artifactId>MoneySAdminShop</artifactId>
@@ -18,8 +18,8 @@
 
     <repositories>
         <repository>
-            <id>potestas-repo</id>
-            <url>https://repo.potestas.xyz/main</url>
+            <id>nukkit-repo</id>
+            <url>https://repo.nukkitx.com/snapshot</url>
         </repository>
     </repositories>
 
@@ -33,9 +33,9 @@
         <dependency>
             <groupId>net.comorevi</groupId>
             <artifactId>MoneySAPI</artifactId>
-            <version>2.0.3-SNAPSHOT</version>
+            <version>3.1.2-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${basedir}/lib/MoneySAPI-2.0.3-SNAPSHOT.jar</systemPath>
+            <systemPath>${basedir}/lib/MoneySAPI-3.1.2-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>

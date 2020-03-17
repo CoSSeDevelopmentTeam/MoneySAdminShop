@@ -5,7 +5,7 @@
  * CosmoSunriseServerPluginEditorsTeam
  *
  * HP: http://info.comorevi.net
- * GitHub: https://github.com/CosmoSunriseServerPluginEditorsTeam
+ * GitHub: https://github.com/CoSSeDevelopmentTeam
  *
  *
  * [Java版]
@@ -23,6 +23,8 @@
  *    手数料の数値が一桁間違っていたのを修正
  *  - 1.2.2
  *    ワールドごとにショップを管理できるよう変更
+ *  - 1.2.3
+ *    MoneySAPIv3.1.2対応とpom.xmlの更新
  *
  */
 

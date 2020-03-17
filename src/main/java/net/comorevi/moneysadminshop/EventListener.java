@@ -115,7 +115,7 @@ public class EventListener implements Listener {
 				if(sqLite3DataProvider.existsShop(signCondition)) {
 					LinkedHashMap<String, Object> shopSignInfo = sqLite3DataProvider.getShopInfo(signCondition);
 					
-					int buyermoney = plugin.getMoneySAPI().getMoney(player);
+					int buyermoney = plugin.getMoneySAPI().getMoney(player.getName());
 					if((int) shopSignInfo.get("price") < buyermoney) {
 						player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
 						return;
