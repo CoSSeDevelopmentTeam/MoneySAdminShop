@@ -1,24 +1,36 @@
 package net.comorevi.moneysadminshop;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 
+import FormAPI.api.FormAPI;
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
+import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
-import cn.nukkit.event.block.SignChangeEvent;
+import cn.nukkit.event.player.PlayerFormRespondedEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.form.element.Element;
+import cn.nukkit.form.element.ElementInput;
+import cn.nukkit.form.element.ElementLabel;
+import cn.nukkit.form.element.ElementSlider;
+import cn.nukkit.form.response.FormResponseCustom;
+import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
+import cn.nukkit.utils.TextFormat;
+import net.comorevi.moneysadminshop.util.DataCenter;
+import net.comorevi.moneysadminshop.util.TextValues;
 
 public class EventListener implements Listener {
 
-    private MoneySAdminShop plugin;
-    private SQLite3DataProvider sqLite3DataProvider;
+    private Main plugin;
+    private FormAPI formAPI = new FormAPI();
 
-    public EventListener(MoneySAdminShop plugin, SQLite3DataProvider sql) {
+    public EventListener(Main plugin) {
         this.plugin = plugin;
-        this.sqLite3DataProvider = sql;
+        formAPI.add("create-ashop", getCreateCShopWindw());
     }
     
     @EventHandler
@@ -28,10 +40,9 @@ public class EventListener implements Listener {
 		switch(block.getId()) {
 			case Block.SIGN_POST:
 			case Block.WALL_SIGN:
-				Object[] signCondition = {(int) block.x, (int) block.y, (int) block.z , block.getLevel().getName()};
-				if(sqLite3DataProvider.existsShop(signCondition)) {
-					if(sqLite3DataProvider.isShopOwnerOrOperator(signCondition, player)) {
-						sqLite3DataProvider.removeShopBySign(signCondition);
+				if(MoneySAdminShopAPI.getInstance().existsShopBySign(block.getLocation())) {
+					if(MoneySAdminShopAPI.getInstance().isOwnerBySign(block.getLocation(), player)) {
+						MoneySAdminShopAPI.getInstance().removeShopBySign(block.getLocation());
 						player.sendMessage(TextValues.INFO + plugin.translateString("shop-removed"));
 					} else {
 						player.sendMessage(TextValues.ALERT + plugin.translateString("﻿error-shop-remove"));
@@ -41,102 +52,97 @@ public class EventListener implements Listener {
 				break;
 		}
     }
-    
-    @EventHandler
-    public void onSignChange(SignChangeEvent event) {
-    	try {
-			if(event.getLine(0).equals("ashop") && !event.getLine(1).equals("") && !event.getLine(2).equals("") && !event.getLine(3).equals("")) {
-				Player player = event.getPlayer();
-				if(player.isOp()) {
-					String shopOwner = player.getName();
-					String[] productData = event.getLine(3).split(":");
-					int saleNum = 0;
-					int price = 0;
-					int priceIncludeCommission = 0;
-					int pID = 0;
-					int pMeta = 0;
-					try {
-						saleNum = Integer.parseInt(event.getLine(1));
-						price = Integer.parseInt(event.getLine(2));
-						priceIncludeCommission = (int) (price * 0.05);
-						pID = Integer.parseInt(productData[0]);
-						pMeta = Integer.parseInt(productData[1]);
-					} catch (NullPointerException e) {
-						pMeta = 0;
-					} catch (ArrayIndexOutOfBoundsException e) {
-						pMeta = 0;
-					} catch (NumberFormatException e) {
-						event.setCancelled();
-						player.sendMessage("システム>> 不適切なデータが入力されました");
-					}
-					
-					Block sign = event.getBlock();
-					
-					if (!event.getLine(0).equals("ashop")) return;
-					if (saleNum <= 0) return;
-					if (price < 0) return;
-					if (pID == 0) return;
-					
-					String productName = Block.get(pID, pMeta).getName();
-					event.setLine(0, "[" + MoneySAdminShop.shopTitle + "]");
-					event.setLine(1, "数量/amount:" + saleNum);
-					event.setLine(2, "値段/price:" + priceIncludeCommission);
-					event.setLine(3, productName);
-					
-					Object[] signCondition = {(int) event.getBlock().x, (int) event.getBlock().y, (int) event.getBlock().z, event.getBlock().getLevel().getName()};
-					if(sqLite3DataProvider.existsShop(signCondition)) {
-						sqLite3DataProvider.updateShop(shopOwner, saleNum, priceIncludeCommission, pID, pMeta, sign);
-					} else {
-						sqLite3DataProvider.registerShop(shopOwner, saleNum, priceIncludeCommission, pID, pMeta, sign);
-					}
-					player.sendMessage(TextValues.INFO + plugin.translateString("shop-create"));
-				} else {
-					player.sendMessage(TextValues.WARNING + plugin.translateString("error-all"));
-				}
-			}
-		} catch(NumberFormatException e) {
-    		return;
-		} catch(ArrayIndexOutOfBoundsException e) {
-    		//なんにもしません
-		} catch(IllegalArgumentException e) {
-    		//なんにもしません
-		}
-    }
-    
+
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		String username = player.getName();
 		Block block = event.getBlock();
-		switch(block.getId()) {
-			case Block.SIGN_POST:
-			case Block.WALL_SIGN:
-				Object[] signCondition = {(int) block.x, (int) block.y, (int) block.z, block.getLevel().getName()};
-				if(sqLite3DataProvider.existsShop(signCondition)) {
-					LinkedHashMap<String, Object> shopSignInfo = sqLite3DataProvider.getShopInfo(signCondition);
-					
-					int buyermoney = plugin.getMoneySAPI().getMoney(player.getName());
-					if((int) shopSignInfo.get("price") < buyermoney) {
-						player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
-						return;
+		if (DataCenter.existsEditCmdQueue(player)) {
+			switch (block.getId()) {
+				case Block.SIGN_POST:
+				case Block.WALL_SIGN:
+					if (plugin.getServer().getLevelByName(block.level.getName()).getBlockEntity(block.getLocation()) instanceof BlockEntitySign) {
+						BlockEntitySign sign = (BlockEntitySign) plugin.getServer().getLevelByName(block.level.getName()).getBlockEntity(block.getLocation());
+						if (sign.getText()[0].equals("ashop")) {
+							player.showFormWindow(formAPI.get("create-ashop"), formAPI.getId("create-ashop"));
+							DataCenter.addEditCmdQueue(player, block);
+						}
 					}
-					
-					int pID = (int) shopSignInfo.get("productID");
-					int pMeta = (int) shopSignInfo.get("productMeta");
-					
-					Item shopItem = Item.get(pID, pMeta, (int) shopSignInfo.get("saleNum"));
-					if(player.getInventory().canAddItem(shopItem)) {
-						player.getInventory().addItem(shopItem);
-					} else {
-						player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
+					break;
+			}
+		} else {
+			switch(block.getId()) {
+				case Block.SIGN_POST:
+				case Block.WALL_SIGN:
+					if(MoneySAdminShopAPI.getInstance().existsShopBySign(block.getLocation())) {
+						LinkedHashMap<String, Object> shopSignInfo = MoneySAdminShopAPI.getInstance().getShopDataBySign(block.getLocation());
+
+						int buyermoney = plugin.getMoneySAPI().getMoney(player.getName());
+						if((int) shopSignInfo.get("price") < buyermoney) {
+							player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
+							return;
+						}
+
+						int pID = (int) shopSignInfo.get("productID");
+						int pMeta = (int) shopSignInfo.get("productMeta");
+
+						Item shopItem = Item.get(pID, pMeta, (int) shopSignInfo.get("saleNum"));
+						if(player.getInventory().canAddItem(shopItem)) {
+							player.getInventory().addItem(shopItem);
+						} else {
+							player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
+						}
+
+						plugin.getMoneySAPI().reduceMoney(username, (int) shopSignInfo.get("price"));
+
+						player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", shopItem.getName(), shopSignInfo.get("saleNum").toString(), shopSignInfo.get("price").toString(), plugin.getMoneySAPI().getMoneyUnit()));
 					}
-					
-					plugin.getMoneySAPI().reduceMoney(username, (int) shopSignInfo.get("price"));
-					
-					player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", shopItem.getName().toString(), shopSignInfo.get("saleNum").toString(), shopSignInfo.get("price").toString(), plugin.getMoneySAPI().getMoneyUnit()));
-				}
-				break;
+					break;
+			}
 		}
     }
+
+    @EventHandler
+	public void onFormResponded(PlayerFormRespondedEvent event) {
+		if (event.getFormID() == formAPI.getId("create-cshop")) {
+			if (event.wasClosed()) return;
+			FormResponseCustom responseCustom = (FormResponseCustom) event.getResponse();
+			if (responseCustom.getInputResponse(1) != null && responseCustom.getInputResponse(2) != null && responseCustom.getInputResponse(4) != null) {
+				int itemId = 0;
+				int itemMeta = 0;
+				int itemAmount = (int) responseCustom.getSliderResponse(3);
+				int itemPrice = 0;
+				try {
+					itemId = Integer.parseInt(responseCustom.getInputResponse(1));
+					itemMeta = Integer.parseInt(responseCustom.getInputResponse(2));
+					itemPrice = Integer.parseInt(responseCustom.getInputResponse(4));
+				} catch (NumberFormatException e) {
+					event.getPlayer().sendMessage(TextValues.ALERT+"適切な値を入力してください。");
+				}
+				if (itemId <= 0 || itemAmount <= 0 || itemPrice < 0 || itemMeta < 0) {
+					event.getPlayer().sendMessage(TextValues.ALERT+"適切な値を入力してください。または看板がチェストに接しているか確認してください。");
+				} else {
+					BlockEntitySign sign = (BlockEntitySign) event.getPlayer().getLevel().getBlockEntity(DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()).getLocation());
+					sign.setText(TextFormat.GOLD + Item.get(itemId).getName(), "個数: " + itemAmount, "値段(手数料込): " + (int) (itemPrice * Main.COMMISTION_RATIO), event.getPlayer().getName());
+					MoneySAdminShopAPI.getInstance().createShop(event.getPlayer().getName(), itemAmount, itemPrice, (int) (itemPrice * Main.COMMISTION_RATIO), itemMeta, DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()));
+					event.getPlayer().sendMessage(TextValues.INFO+"チェストショップを作成しました。\n編集モードをオフにするには/cshopを実行。");
+				}
+			} else {
+				event.getPlayer().sendMessage(TextValues.ALERT+"すべての入力欄に適切な値を入力してください。");
+			}
+		}
+	}
+
+	private FormWindowCustom getCreateCShopWindw() {
+		Element[] elements = {
+				new ElementLabel("ショップの情報を入力してください。適切な値を入力しなければ作成できません。"),
+				new ElementInput("Item ID", "1以上256以下で入力..."),
+				new ElementInput("Item META(DAMAGE)", "メタ値を入力...", String.valueOf(0)),
+				new ElementSlider("Amount", 1, 64, 1, 4),
+				new ElementInput("Price", "0以上で入力...")
+		};
+		return new FormWindowCustom("Create - OfficialShop", Arrays.asList(elements));
+	}
 
 }

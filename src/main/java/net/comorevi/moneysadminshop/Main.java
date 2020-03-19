@@ -25,6 +25,8 @@
  *    ワールドごとにショップを管理できるよう変更
  *  - 1.2.3
  *    MoneySAPIv3.1.2対応とpom.xmlの更新
+ *  - 1.2.4
+ *    SQLite3DataProviderの書き直しに伴う変更とGUI化
  *
  */
 
@@ -45,12 +47,16 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import cn.nukkit.utils.Utils;
 import net.comorevi.moneyapi.MoneySAPI;
+import net.comorevi.moneysadminshop.util.SQLite3DataProvider;
+import net.comorevi.moneysadminshop.util.TextValues;
 
-public class MoneySAdminShop extends PluginBase {
+public class Main extends PluginBase {
 	
 	private MoneySAPI money;
+	protected static final double COMMISTION_RATIO = 1.10;
 	
 	private Config translateFile;
     private Map<String, Object> configData = new HashMap<String, Object>();
@@ -65,10 +71,8 @@ public class MoneySAdminShop extends PluginBase {
 		this.initHelpFile();
 		this.initMessageConfig();
 		this.initMoneySAdminShopConfig();
-		
-		SQLite3DataProvider sql = new SQLite3DataProvider(this);
 
-		this.getServer().getPluginManager().registerEvents(new EventListener(this, sql), this);
+		this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
 		
 		try{
             this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");
@@ -77,27 +81,12 @@ public class MoneySAdminShop extends PluginBase {
             this.getServer().getPluginManager().disablePlugin(this);
         }
 	}
-	
+
 	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if(command.getName().equals("adminshop")) {
-			
-			if(sender instanceof ConsoleCommandSender){
-                sender.sendMessage(TextValues.WARNING + this.translateString("error-command-console"));
-                return true;
-            }
-			
-			try{if(args[0] != null){}}
-            catch(ArrayIndexOutOfBoundsException e){
-                this.helpMessage(sender);
-                return true;
-            }
-			
-		}
-		return false;
-		
-	}
-	
+    public void onDisable() {
+	    MoneySAdminShopAPI.getInstance().disconnectSQL();
+    }
+
 	/////////////
 	// Utility //
 	/////////////

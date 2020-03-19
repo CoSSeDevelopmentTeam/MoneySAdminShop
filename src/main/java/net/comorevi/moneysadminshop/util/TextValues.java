@@ -1,4 +1,4 @@
-package net.comorevi.moneysadminshop;
+package net.comorevi.moneysadminshop.util;
 
 import cn.nukkit.utils.TextFormat;
 

@@ -1,11 +1,18 @@
 name: MoneySAdminShop
-main: net.comorevi.moneysadminshop.MoneySAdminShop
+main: net.comorevi.moneysadminshop.Main
 author: popkechupki
 api: ["1.0.0"]
-version: 1.2.3
+version: 1.2.4
 load: POSTWORLD
 description: CoSSeのadminshopプラグイン
+depend:
+  - MoneySAPI
+  - FormAPI
 
-commands:
-  adminshop:
-    description: アドミンショップのヘルプを確認できます。
+permissions:
+  moneysadminshop:
+    children:
+      moneysadminshop.command:
+        children:
+          moneysadminshop.command.ashop:
+            default: op
