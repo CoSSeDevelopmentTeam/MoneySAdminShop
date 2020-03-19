@@ -27,6 +27,8 @@
  *    MoneySAPIv3.1.2対応とpom.xmlの更新
  *  - 1.2.4
  *    SQLite3DataProviderの書き直しに伴う変更とGUI化
+ *  - 1.2.5
+ *    データーベース名を修正
  *
  */
 

@@ -16,8 +16,8 @@ public class SQLite3DataProvider {
 			e.printStackTrace();
 		}
 		try {
-			this.connection = DriverManager.getConnection("jdbc:sqlite:./plugins/MoneySChestShop/DataDB.db");
-			String sql = "create table if not exists ChestShop " +
+			this.connection = DriverManager.getConnection("jdbc:sqlite:./plugins/MoneySAdminShop/DataDB.db");
+			String sql = "create table if not exists AdminShop " +
 					"(" +
 					"id integer primary key autoincrement, " +
 					"shopOwner text not null, " +
@@ -42,7 +42,7 @@ public class SQLite3DataProvider {
 	public boolean existsShopBySign(Location location) throws SQLException {
 		PreparedStatement statement = null;
 		try {
-			String sql = "select * from ChestShop where signX = ? and signY = ? and signZ = ? and level = ?";
+			String sql = "select * from AdminShop where signX = ? and signY = ? and signZ = ? and level = ?";
 			statement = connection.prepareStatement(sql);
 			statement.setInt(1, location.getFloorX());
 			statement.setInt(2, location.getFloorY());
@@ -61,7 +61,7 @@ public class SQLite3DataProvider {
 
 	public void addShop(String owner, int amount, int price, int itemId, int itemMeta, Location signLocation) {
 		try {
-			String sql = "insert into ChestShop (shopOwner, saleNum, price, productID, productMeta, signX, signY, signZ, chestX, chestY, chestZ , level) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String sql = "insert into AdminShop (shopOwner, saleNum, price, productID, productMeta, signX, signY, signZ, chestX, chestY, chestZ , level) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			statement.setString(1, owner);
 			statement.setInt(2, amount);
@@ -84,7 +84,7 @@ public class SQLite3DataProvider {
 	public void removeShopBySign(Location location) {
 		try {
 			if (!existsShopBySign(location)) throw new NullPointerException("There is no shop in that location.");
-			String sql = "delete from ChestShop where signX = ? and signY = ? and signZ = ? and level = ?";
+			String sql = "delete from AdminShop where signX = ? and signY = ? and signZ = ? and level = ?";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			statement.setInt(1, location.getFloorX());
 			statement.setInt(2, location.getFloorY());
@@ -102,7 +102,7 @@ public class SQLite3DataProvider {
 	public LinkedHashMap<String, Object> getShopInfoMapBySign(Location location) {
 		try {
 			if (!existsShopBySign(location)) throw new NullPointerException("There is no shop in that location.");
-			String sql = "select * from ChestShop where signX = ? and signY = ? and signZ = ? and level = ?";
+			String sql = "select * from AdminShop where signX = ? and signY = ? and signZ = ? and level = ?";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			statement.setInt(1, location.getFloorX());
 			statement.setInt(2, location.getFloorY());
