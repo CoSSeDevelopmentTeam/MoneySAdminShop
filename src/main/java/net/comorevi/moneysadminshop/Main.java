@@ -52,6 +52,7 @@ import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import cn.nukkit.utils.Utils;
 import net.comorevi.moneyapi.MoneySAPI;
+import net.comorevi.moneysadminshop.command.AdminShopCommand;
 import net.comorevi.moneysadminshop.util.SQLite3DataProvider;
 import net.comorevi.moneysadminshop.util.TextValues;
 
@@ -75,6 +76,7 @@ public class Main extends PluginBase {
 		this.initMoneySAdminShopConfig();
 
 		this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        this.getServer().getCommandMap().register("ashop", new AdminShopCommand("ashop"));
 		
 		try{
             this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");

@@ -57,6 +57,13 @@
       <scope>system</scope>
       <systemPath>${basedir}/lib/MoneySAPI-3.1.2-SNAPSHOT.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>FormAPI</groupId>
+      <artifactId>FormAPI</artifactId>
+      <version>1.0.1</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/FormAPI-1.0.1.jar</systemPath>
+    </dependency>
   </dependencies>
   <properties>
     <maven.compiler.target>1.8</maven.compiler.target>
