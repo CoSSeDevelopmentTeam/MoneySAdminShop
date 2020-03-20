@@ -62,8 +62,9 @@ public class EventListener implements Listener {
 			switch (block.getId()) {
 				case Block.SIGN_POST:
 				case Block.WALL_SIGN:
-					if (plugin.getServer().getLevelByName(block.level.getName()).getBlockEntity(block.getLocation()) instanceof BlockEntitySign) {
-						BlockEntitySign sign = (BlockEntitySign) plugin.getServer().getLevelByName(block.level.getName()).getBlockEntity(block.getLocation());
+					event.setCancelled();
+					if (player.getLevel().getBlockEntity(block.getLocation()) instanceof BlockEntitySign) {
+						BlockEntitySign sign = (BlockEntitySign) player.getLevel().getBlockEntity(block.getLocation());
 						if (sign.getText()[0].equals("ashop")) {
 							player.showFormWindow(formAPI.get("create-ashop"), formAPI.getId("create-ashop"));
 							DataCenter.addEditCmdQueue(player, block);
@@ -79,7 +80,7 @@ public class EventListener implements Listener {
 						LinkedHashMap<String, Object> shopSignInfo = MoneySAdminShopAPI.getInstance().getShopDataBySign(block.getLocation());
 
 						int buyermoney = plugin.getMoneySAPI().getMoney(player.getName());
-						if((int) shopSignInfo.get("price") < buyermoney) {
+						if((int) shopSignInfo.get("price") > buyermoney) {
 							player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
 							return;
 						}
