@@ -61,7 +61,7 @@ public class SQLite3DataProvider {
 
 	public void addShop(String owner, int amount, int price, int itemId, int itemMeta, Location signLocation) {
 		try {
-			String sql = "insert into AdminShop (shopOwner, saleNum, price, productID, productMeta, signX, signY, signZ, chestX, chestY, chestZ , level) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String sql = "insert into AdminShop (shopOwner, saleNum, price, productID, productMeta, signX, signY, signZ, level) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			PreparedStatement statement = connection.prepareStatement(sql);
 			statement.setString(1, owner);
 			statement.setInt(2, amount);
