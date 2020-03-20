@@ -41,7 +41,7 @@ public class EventListener implements Listener {
 			case Block.SIGN_POST:
 			case Block.WALL_SIGN:
 				if(MoneySAdminShopAPI.getInstance().existsShopBySign(block.getLocation())) {
-					if(MoneySAdminShopAPI.getInstance().isOwnerBySign(block.getLocation(), player)) {
+					if(player.isOp()) {
 						MoneySAdminShopAPI.getInstance().removeShopBySign(block.getLocation());
 						player.sendMessage(TextValues.INFO + plugin.translateString("shop-removed"));
 					} else {
