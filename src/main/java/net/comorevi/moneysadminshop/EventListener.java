@@ -118,18 +118,19 @@ public class EventListener implements Listener {
 					itemMeta = Integer.parseInt(responseCustom.getInputResponse(2));
 					itemPrice = Integer.parseInt(responseCustom.getInputResponse(4));
 				} catch (NumberFormatException e) {
-					event.getPlayer().sendMessage(TextValues.ALERT+"適切な値を入力してください。");
+					event.getPlayer().sendMessage(TextValues.ALERT+plugin.translateString("error-shop-create"));
+					return;
 				}
 				if (itemId <= 0 || itemAmount <= 0 || itemPrice < 0 || itemMeta < 0) {
-					event.getPlayer().sendMessage(TextValues.ALERT+"適切な値を入力してください。または看板がチェストに接しているか確認してください。");
+					event.getPlayer().sendMessage(TextValues.ALERT+plugin.translateString("error-shop-create2"));
 				} else {
 					BlockEntitySign sign = (BlockEntitySign) event.getPlayer().getLevel().getBlockEntity(DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()).getLocation());
 					sign.setText(TextFormat.GOLD + Item.get(itemId).getName(), "個数: " + itemAmount, "値段(手数料込): " + (int) (itemPrice * Main.COMMISTION_RATIO), event.getPlayer().getName());
 					MoneySAdminShopAPI.getInstance().createShop(event.getPlayer().getName(), itemAmount, itemPrice, (int) (itemPrice * Main.COMMISTION_RATIO), itemMeta, DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()));
-					event.getPlayer().sendMessage(TextValues.INFO+"チェストショップを作成しました。\n編集モードをオフにするには/ashopを実行。");
+					event.getPlayer().sendMessage(TextValues.INFO+plugin.translateString("shop-create"));
 				}
 			} else {
-				event.getPlayer().sendMessage(TextValues.ALERT+"すべての入力欄に適切な値を入力してください。");
+				event.getPlayer().sendMessage(TextValues.ALERT+plugin.translateString("error-shop-create"));
 			}
 		}
 	}
