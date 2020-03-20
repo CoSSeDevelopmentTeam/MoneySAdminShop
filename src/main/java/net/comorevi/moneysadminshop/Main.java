@@ -29,6 +29,8 @@
  *    SQLite3DataProviderの書き直しに伴う変更とGUI化
  *  - 1.2.5
  *    データーベース名を修正
+ * - 1.3.0
+ *   MoneySAPI v4.0.0対応
  *
  */
 
@@ -44,23 +46,14 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
-import cn.nukkit.utils.TextFormat;
 import cn.nukkit.utils.Utils;
-import net.comorevi.moneyapi.MoneySAPI;
 import net.comorevi.moneysadminshop.command.AdminShopCommand;
-import net.comorevi.moneysadminshop.util.SQLite3DataProvider;
 import net.comorevi.moneysadminshop.util.TextValues;
 
 public class Main extends PluginBase {
-	
-	private MoneySAPI money;
-	protected static final double COMMISTION_RATIO = 1.10;
-	
 	private Config translateFile;
     private Map<String, Object> configData = new HashMap<String, Object>();
     private Map<String, Object> pluginData = new HashMap<String, Object>();
@@ -77,13 +70,6 @@ public class Main extends PluginBase {
 
 		this.getServer().getPluginManager().registerEvents(new EventListener(this), this);
         this.getServer().getCommandMap().register("ashop", new AdminShopCommand("ashop"));
-		
-		try{
-            this.money = (MoneySAPI) this.getServer().getPluginManager().getPlugin("MoneySAPI");
-        }catch(Exception e){
-            this.getLogger().alert(TextValues.ALERT + this.translateString("error-no-moneysapi"));
-            this.getServer().getPluginManager().disablePlugin(this);
-        }
 	}
 
 	@Override
@@ -94,10 +80,6 @@ public class Main extends PluginBase {
 	/////////////
 	// Utility //
 	/////////////
-	public MoneySAPI getMoneySAPI() {
-		return this.money;
-	}
-	
 	public void helpMessage(final CommandSender sender){
         Thread th = new Thread(new Runnable(){
             @Override

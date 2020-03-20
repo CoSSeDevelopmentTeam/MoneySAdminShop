@@ -20,6 +20,8 @@ import cn.nukkit.form.response.FormResponseCustom;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
 import cn.nukkit.utils.TextFormat;
+import net.comorevi.moneyapi.MoneySAPI;
+import net.comorevi.moneyapi.util.TAXType;
 import net.comorevi.moneysadminshop.util.DataCenter;
 import net.comorevi.moneysadminshop.util.TextValues;
 
@@ -79,8 +81,7 @@ public class EventListener implements Listener {
 					if(MoneySAdminShopAPI.getInstance().existsShopBySign(block.getLocation())) {
 						LinkedHashMap<String, Object> shopSignInfo = MoneySAdminShopAPI.getInstance().getShopDataBySign(block.getLocation());
 
-						int buyermoney = plugin.getMoneySAPI().getMoney(player.getName());
-						if((int) shopSignInfo.get("price") > buyermoney) {
+						if((int) shopSignInfo.get("price") > MoneySAPI.getInstance().getMoney(player)) {
 							player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
 							return;
 						}
@@ -95,9 +96,9 @@ public class EventListener implements Listener {
 							player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
 						}
 
-						plugin.getMoneySAPI().reduceMoney(username, (int) shopSignInfo.get("price"));
+						MoneySAPI.getInstance().reduceMoney(username, (int) shopSignInfo.get("price"));
 
-						player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", shopItem.getName(), shopSignInfo.get("saleNum").toString(), shopSignInfo.get("price").toString(), plugin.getMoneySAPI().getMoneyUnit()));
+						player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", shopItem.getName(), shopSignInfo.get("saleNum").toString(), shopSignInfo.get("price").toString(), MoneySAPI.UNIT));
 					}
 					break;
 			}
@@ -126,8 +127,8 @@ public class EventListener implements Listener {
 					event.getPlayer().sendMessage(TextValues.ALERT+plugin.translateString("error-shop-create2"));
 				} else {
 					BlockEntitySign sign = (BlockEntitySign) event.getPlayer().getLevel().getBlockEntity(DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()).getLocation());
-					sign.setText(TextFormat.GOLD + Item.get(itemId).getName(), "個数: " + itemAmount, "値段(手数料込): " + (int) (itemPrice * Main.COMMISTION_RATIO), "official");
-					MoneySAdminShopAPI.getInstance().createShop(event.getPlayer().getName(), itemAmount, (int) (itemPrice * Main.COMMISTION_RATIO), itemId, itemMeta, DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()));
+					sign.setText(TextFormat.GOLD + Item.get(itemId).getName(), "個数: " + itemAmount, "値段(手数料込): " + (int) (itemPrice * TAXType.ADMIN_SHOP), "official");
+					MoneySAdminShopAPI.getInstance().createShop(event.getPlayer().getName(), itemAmount, (int) (itemPrice * TAXType.ADMIN_SHOP), itemId, itemMeta, DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()));
 					event.getPlayer().sendMessage(TextValues.INFO+plugin.translateString("shop-create"));
 				}
 			} else {
