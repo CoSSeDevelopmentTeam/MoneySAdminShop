@@ -125,8 +125,8 @@ public class EventListener implements Listener {
 					event.getPlayer().sendMessage(TextValues.ALERT+plugin.translateString("error-shop-create2"));
 				} else {
 					BlockEntitySign sign = (BlockEntitySign) event.getPlayer().getLevel().getBlockEntity(DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()).getLocation());
-					sign.setText(TextFormat.GOLD + Item.get(itemId).getName(), "個数: " + itemAmount, "値段(手数料込): " + (int) (itemPrice * Main.COMMISTION_RATIO), event.getPlayer().getName());
-					MoneySAdminShopAPI.getInstance().createShop(event.getPlayer().getName(), itemAmount, itemPrice, (int) (itemPrice * Main.COMMISTION_RATIO), itemMeta, DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()));
+					sign.setText(TextFormat.GOLD + Item.get(itemId).getName(), "個数: " + itemAmount, "値段(手数料込): " + (int) (itemPrice * Main.COMMISTION_RATIO), "official");
+					MoneySAdminShopAPI.getInstance().createShop(event.getPlayer().getName(), itemAmount, (int) (itemPrice * Main.COMMISTION_RATIO), itemId, itemMeta, DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()));
 					event.getPlayer().sendMessage(TextValues.INFO+plugin.translateString("shop-create"));
 				}
 			} else {
