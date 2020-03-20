@@ -30,7 +30,7 @@ public class EventListener implements Listener {
 
     public EventListener(Main plugin) {
         this.plugin = plugin;
-        formAPI.add("create-ashop", getCreateCShopWindw());
+        formAPI.add("create-ashop", getCreateAShopWindow());
     }
     
     @EventHandler
@@ -105,7 +105,7 @@ public class EventListener implements Listener {
 
     @EventHandler
 	public void onFormResponded(PlayerFormRespondedEvent event) {
-		if (event.getFormID() == formAPI.getId("create-cshop")) {
+		if (event.getFormID() == formAPI.getId("create-ashop")) {
 			if (event.wasClosed()) return;
 			FormResponseCustom responseCustom = (FormResponseCustom) event.getResponse();
 			if (responseCustom.getInputResponse(1) != null && responseCustom.getInputResponse(2) != null && responseCustom.getInputResponse(4) != null) {
@@ -126,7 +126,7 @@ public class EventListener implements Listener {
 					BlockEntitySign sign = (BlockEntitySign) event.getPlayer().getLevel().getBlockEntity(DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()).getLocation());
 					sign.setText(TextFormat.GOLD + Item.get(itemId).getName(), "個数: " + itemAmount, "値段(手数料込): " + (int) (itemPrice * Main.COMMISTION_RATIO), event.getPlayer().getName());
 					MoneySAdminShopAPI.getInstance().createShop(event.getPlayer().getName(), itemAmount, itemPrice, (int) (itemPrice * Main.COMMISTION_RATIO), itemMeta, DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()));
-					event.getPlayer().sendMessage(TextValues.INFO+"チェストショップを作成しました。\n編集モードをオフにするには/cshopを実行。");
+					event.getPlayer().sendMessage(TextValues.INFO+"チェストショップを作成しました。\n編集モードをオフにするには/ashopを実行。");
 				}
 			} else {
 				event.getPlayer().sendMessage(TextValues.ALERT+"すべての入力欄に適切な値を入力してください。");
@@ -134,7 +134,7 @@ public class EventListener implements Listener {
 		}
 	}
 
-	private FormWindowCustom getCreateCShopWindw() {
+	private FormWindowCustom getCreateAShopWindow() {
 		Element[] elements = {
 				new ElementLabel("ショップの情報を入力してください。適切な値を入力しなければ作成できません。"),
 				new ElementInput("Item ID", "1以上256以下で入力..."),
