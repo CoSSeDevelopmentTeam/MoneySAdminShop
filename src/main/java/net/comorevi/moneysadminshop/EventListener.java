@@ -20,19 +20,21 @@ import cn.nukkit.form.response.FormResponseCustom;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
 import cn.nukkit.utils.TextFormat;
+import net.comorevi.cphone.presenter.SharingData;
 import net.comorevi.moneyapi.MoneySAPI;
 import net.comorevi.moneyapi.util.TAXType;
 import net.comorevi.moneysadminshop.util.DataCenter;
-import net.comorevi.moneysadminshop.util.TextValues;
 
 public class EventListener implements Listener {
 
     private Main plugin;
     private FormAPI formAPI = new FormAPI();
+    private Boolean isCPhoneLoaded = false;
 
     public EventListener(Main plugin) {
         this.plugin = plugin;
         formAPI.add("create-ashop", getCreateAShopWindow());
+        if (SharingData.pluginInstance != null) isCPhoneLoaded = true;
     }
     
     @EventHandler
@@ -45,9 +47,9 @@ public class EventListener implements Listener {
 				if(MoneySAdminShopAPI.getInstance().existsShopBySign(block.getLocation())) {
 					if(player.isOp()) {
 						MoneySAdminShopAPI.getInstance().removeShopBySign(block.getLocation());
-						player.sendMessage(TextValues.INFO + plugin.translateString("shop-removed"));
+						player.sendMessage(Main.PREFIX + plugin.translateString("shop-removed"));
 					} else {
-						player.sendMessage(TextValues.ALERT + plugin.translateString("﻿error-shop-remove"));
+						player.sendMessage(Main.PREFIX + plugin.translateString("﻿error-shop-remove"));
 						event.setCancelled();
 					}
 				}
@@ -64,6 +66,11 @@ public class EventListener implements Listener {
 			switch (block.getId()) {
 				case Block.SIGN_POST:
 				case Block.WALL_SIGN:
+					if (isCPhoneLoaded && event.getPlayer().getInventory().getItemInHand().getId() == SharingData.triggerItemId) {
+						event.getPlayer().sendMessage(Main.PREFIX+plugin.translateString("cancel-cphone-trigger"));
+						return;
+					}
+
 					event.setCancelled();
 					if (player.getLevel().getBlockEntity(block.getLocation()) instanceof BlockEntitySign) {
 						BlockEntitySign sign = (BlockEntitySign) player.getLevel().getBlockEntity(block.getLocation());
@@ -79,10 +86,16 @@ public class EventListener implements Listener {
 				case Block.SIGN_POST:
 				case Block.WALL_SIGN:
 					if(MoneySAdminShopAPI.getInstance().existsShopBySign(block.getLocation())) {
+						if (isCPhoneLoaded && event.getPlayer().getInventory().getItemInHand().getId() == SharingData.triggerItemId) {
+							event.getPlayer().sendMessage(Main.PREFIX+plugin.translateString("cancel-cphone-trigger"));
+							return;
+						}
+
+						event.setCancelled();
 						LinkedHashMap<String, Object> shopSignInfo = MoneySAdminShopAPI.getInstance().getShopDataBySign(block.getLocation());
 
 						if((int) shopSignInfo.get("price") > MoneySAPI.getInstance().getMoney(player)) {
-							player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy2"));
+							player.sendMessage(Main.PREFIX + plugin.translateString("error-shop-buy2"));
 							return;
 						}
 
@@ -93,12 +106,12 @@ public class EventListener implements Listener {
 						if(player.getInventory().canAddItem(shopItem)) {
 							player.getInventory().addItem(shopItem);
 						} else {
-							player.sendMessage(TextValues.INFO + plugin.translateString("error-shop-buy1"));
+							player.sendMessage(Main.PREFIX + plugin.translateString("error-shop-buy1"));
 						}
 
 						MoneySAPI.getInstance().reduceMoney(username, (int) shopSignInfo.get("price"));
 
-						player.sendMessage(TextValues.INFO + plugin.translateString("shop-buy", shopItem.getName(), shopSignInfo.get("saleNum").toString(), shopSignInfo.get("price").toString(), MoneySAPI.UNIT));
+						player.sendMessage(Main.PREFIX + plugin.translateString("shop-buy", shopItem.getName(), shopSignInfo.get("saleNum").toString(), shopSignInfo.get("price").toString(), MoneySAPI.UNIT));
 					}
 					break;
 			}
@@ -120,19 +133,19 @@ public class EventListener implements Listener {
 					itemMeta = Integer.parseInt(responseCustom.getInputResponse(2));
 					itemPrice = Integer.parseInt(responseCustom.getInputResponse(4));
 				} catch (NumberFormatException e) {
-					event.getPlayer().sendMessage(TextValues.ALERT+plugin.translateString("error-shop-create"));
+					event.getPlayer().sendMessage(Main.PREFIX+plugin.translateString("error-shop-create"));
 					return;
 				}
 				if (itemId <= 0 || itemAmount <= 0 || itemPrice < 0 || itemMeta < 0) {
-					event.getPlayer().sendMessage(TextValues.ALERT+plugin.translateString("error-shop-create2"));
+					event.getPlayer().sendMessage(Main.PREFIX+plugin.translateString("error-shop-create2"));
 				} else {
 					BlockEntitySign sign = (BlockEntitySign) event.getPlayer().getLevel().getBlockEntity(DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()).getLocation());
 					sign.setText(TextFormat.GOLD + Item.get(itemId).getName(), "個数: " + itemAmount, "値段(手数料込): " + (int) (itemPrice * TAXType.ADMIN_SHOP), "official");
 					MoneySAdminShopAPI.getInstance().createShop(event.getPlayer().getName(), itemAmount, (int) (itemPrice * TAXType.ADMIN_SHOP), itemId, itemMeta, DataCenter.getRegisteredBlockByEditCmdQueue(event.getPlayer()));
-					event.getPlayer().sendMessage(TextValues.INFO+plugin.translateString("shop-create"));
+					event.getPlayer().sendMessage(Main.PREFIX+plugin.translateString("shop-create"));
 				}
 			} else {
-				event.getPlayer().sendMessage(TextValues.ALERT+plugin.translateString("error-shop-create"));
+				event.getPlayer().sendMessage(Main.PREFIX+plugin.translateString("error-shop-create"));
 			}
 		}
 	}

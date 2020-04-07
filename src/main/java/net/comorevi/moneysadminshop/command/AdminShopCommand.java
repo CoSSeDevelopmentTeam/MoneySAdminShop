@@ -5,7 +5,6 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import net.comorevi.moneysadminshop.Main;
 import net.comorevi.moneysadminshop.util.DataCenter;
-import net.comorevi.moneysadminshop.util.TextValues;
 
 public class AdminShopCommand extends Command {
     public AdminShopCommand(String name) {
@@ -26,10 +25,10 @@ public class AdminShopCommand extends Command {
 
         if (DataCenter.existsEditCmdQueue((Player) commandSender)) {
             DataCenter.removeEditCmdQueue((Player) commandSender);
-            commandSender.sendMessage(TextValues.INFO + "チェストショップ編集モードを無効化しました。");
+            commandSender.sendMessage(Main.PREFIX + "チェストショップ編集モードを無効化しました。");
         } else {
             DataCenter.addEditCmdQueue((Player) commandSender);
-            commandSender.sendMessage(TextValues.INFO + "チェストショップ編集モードを有効化しました。");
+            commandSender.sendMessage(Main.PREFIX + "チェストショップ編集モードを有効化しました。");
         }
         return true;
     }

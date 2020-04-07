@@ -31,6 +31,8 @@
  *    データーベース名を修正
  * - 1.3.0
  *   MoneySAPI v4.0.0対応
+ *  - 1.3.1
+ *    しふぉんを持った状態では操作を受け付けないように変更
  *
  */
 
@@ -49,9 +51,9 @@ import java.util.Map;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import cn.nukkit.utils.Utils;
 import net.comorevi.moneysadminshop.command.AdminShopCommand;
-import net.comorevi.moneysadminshop.util.TextValues;
 
 public class Main extends PluginBase {
 	private Config translateFile;
@@ -60,6 +62,7 @@ public class Main extends PluginBase {
     private Config conf;
     
     public static String shopTitle;
+    public static final String PREFIX = TextFormat.GRAY + "AdminShop>>" + TextFormat.RESET;
 	
 	@Override
 	public void onEnable() {
@@ -117,7 +120,7 @@ public class Main extends PluginBase {
     public String translateString(String key, String... args){
         if(configData != null || !configData.isEmpty()){
             String src = (String) configData.get(key);
-            if(src == null || src.equals("")) return TextValues.ALERT + (String) configData.get("error-notFoundKey");
+            if(src == null || src.equals("")) return Main.PREFIX + (String) configData.get("error-notFoundKey");
             for(int i=0;i < args.length;i++){
                 src = src.replace("{%" + i + "}", args[i]);
             }
