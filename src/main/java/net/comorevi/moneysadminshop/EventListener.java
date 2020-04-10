@@ -8,6 +8,7 @@ import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntitySign;
 import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.player.PlayerFormRespondedEvent;
@@ -20,7 +21,7 @@ import cn.nukkit.form.response.FormResponseCustom;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
 import cn.nukkit.utils.TextFormat;
-import net.comorevi.cphone.presenter.SharingData;
+import net.comorevi.cphone.cphone.event.CPhoneOpenEvent;
 import net.comorevi.moneyapi.MoneySAPI;
 import net.comorevi.moneyapi.util.TAXType;
 import net.comorevi.moneysadminshop.util.DataCenter;
@@ -29,12 +30,10 @@ public class EventListener implements Listener {
 
     private Main plugin;
     private FormAPI formAPI = new FormAPI();
-    private Boolean isCPhoneLoaded = false;
 
     public EventListener(Main plugin) {
         this.plugin = plugin;
         formAPI.add("create-ashop", getCreateAShopWindow());
-        if (SharingData.pluginInstance != null) isCPhoneLoaded = true;
     }
     
     @EventHandler
@@ -66,11 +65,6 @@ public class EventListener implements Listener {
 			switch (block.getId()) {
 				case Block.SIGN_POST:
 				case Block.WALL_SIGN:
-					if (isCPhoneLoaded && event.getPlayer().getInventory().getItemInHand().getId() == SharingData.triggerItemId) {
-						event.getPlayer().sendMessage(Main.PREFIX+plugin.translateString("cancel-cphone-trigger"));
-						return;
-					}
-
 					event.setCancelled();
 					if (player.getLevel().getBlockEntity(block.getLocation()) instanceof BlockEntitySign) {
 						BlockEntitySign sign = (BlockEntitySign) player.getLevel().getBlockEntity(block.getLocation());
@@ -86,11 +80,6 @@ public class EventListener implements Listener {
 				case Block.SIGN_POST:
 				case Block.WALL_SIGN:
 					if(MoneySAdminShopAPI.getInstance().existsShopBySign(block.getLocation())) {
-						if (isCPhoneLoaded && event.getPlayer().getInventory().getItemInHand().getId() == SharingData.triggerItemId) {
-							event.getPlayer().sendMessage(Main.PREFIX+plugin.translateString("cancel-cphone-trigger"));
-							return;
-						}
-
 						event.setCancelled();
 						LinkedHashMap<String, Object> shopSignInfo = MoneySAdminShopAPI.getInstance().getShopDataBySign(block.getLocation());
 
@@ -118,7 +107,7 @@ public class EventListener implements Listener {
 		}
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.NORMAL)
 	public void onFormResponded(PlayerFormRespondedEvent event) {
 		if (event.getFormID() == formAPI.getId("create-ashop")) {
 			if (event.wasClosed()) return;
@@ -148,6 +137,11 @@ public class EventListener implements Listener {
 				event.getPlayer().sendMessage(Main.PREFIX+plugin.translateString("error-shop-create"));
 			}
 		}
+	}
+
+	@EventHandler
+	public void onCPhoneOpen(CPhoneOpenEvent event) {
+		if (DataCenter.existsEditCmdQueue(event.getCPhone().getPlayer())) event.setCancelled();
 	}
 
 	private FormWindowCustom getCreateAShopWindow() {
