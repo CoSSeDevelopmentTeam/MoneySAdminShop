@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.comorevi</groupId>
     <artifactId>MoneySAdminShop</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>MoneySAdminShop</name>
@@ -34,8 +34,7 @@
             <groupId>net.comorevi</groupId>
             <artifactId>MoneySAPI</artifactId>
             <version>4.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/MoneySAPI-4.0-SNAPSHOT.jar</systemPath>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
@@ -43,17 +42,17 @@
             <version>3.21.0.1</version>
         </dependency>
         <dependency>
-            <groupId>FormAPI</groupId>
-            <artifactId>FormAPI</artifactId>
-            <version>1.0.1</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/FormAPI-1.0.1.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>net.comorevi</groupId>
             <artifactId>CPhone</artifactId>
             <version>1.3.6-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ru.nukkitx</groupId>
+            <artifactId>FormAPI</artifactId>
+            <version>2.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/FormAPI-2.1-SNAPSHOT.jar</systemPath>
         </dependency>
     </dependencies>
 
