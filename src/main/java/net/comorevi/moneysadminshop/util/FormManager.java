@@ -52,7 +52,7 @@ public class FormManager {
     public CustomForm getCreateAShopWindow() {
         CustomForm customForm = new CustomForm("作成 - AdminShop")
                 .addLabel("ショップの情報を入力してください。適切な値を入力しなければ作成できません。")
-                .addInput("Item ID", "1以上256以下で入力...")
+                .addInput("Item ID", "アイテムIDを入力...")
                 .addInput("Item META(DAMAGE)", "メタ値を入力...", String.valueOf(0))
                 .addSlider("Amount", 1, 64, 1, 4)
                 .addInput("Price", "0以上で入力...");
